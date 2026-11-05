@@ -9,7 +9,6 @@ services:
       SCALEWAY_MODEL: ${SCALEWAY_MODEL:-llama-3.3-70b-instruct}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
-      ORIGIN: ${ORIGIN:-http://localhost:3000}
       MAX_TEAMS: ${MAX_TEAMS:-40}
     volumes:
       - game-data:/data

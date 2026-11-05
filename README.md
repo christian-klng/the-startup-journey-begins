@@ -31,5 +31,5 @@ SQLite at `DATABASE_PATH` (default `./data/game.sqlite`). Migrations in
 
 Build from the `Dockerfile` or use `docker-compose.yml`. Mount a volume at
 `/data`, expose port 3000, set the variables from `.env.example`
-(`PUBLIC_BASE_URL` and `ORIGIN` must be the URL phones will use). Health check:
+(`PUBLIC_BASE_URL` must be the URL phones will use). Health check:
 `GET /healthz`.

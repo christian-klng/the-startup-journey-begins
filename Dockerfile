@@ -13,6 +13,10 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
     HOST=0.0.0.0 \
+    # The request origin (used for the cross-site form check) comes from the proxy's
+    # forwarded headers; without them adapter-node assumes https and rejects HTTP forms.
+    PROTOCOL_HEADER=x-forwarded-proto \
+    HOST_HEADER=x-forwarded-host \
     DATABASE_PATH=/data/game.sqlite \
     CONTENT_DIR=/app/content \
     MIGRATIONS_DIR=/app/drizzle

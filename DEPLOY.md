@@ -17,10 +17,10 @@ Push this repository to GitHub (private is fine) and connect it in Coolify:
 | `SCALEWAY_MODEL` | `llama-3.3-70b-instruct` (or another Scaleway model) |
 | `ADMIN_PASSWORD` | password for `/admin` |
 | `PUBLIC_BASE_URL` | the URL phones will open, e.g. `http://startup.example.com` |
-| `ORIGIN` | same value as `PUBLIC_BASE_URL` |
 
 `SCALEWAY_BASE_URL`, `DATABASE_PATH`, `CONTENT_DIR`, `MIGRATIONS_DIR` and `MAX_TEAMS`
-have defaults in the image and only need setting to override.
+have defaults in the image and only need setting to override. No `ORIGIN` variable is
+needed: the image reads the proxy's `X-Forwarded-Proto` and `X-Forwarded-Host` headers.
 
 ## 3. Persistent storage
 
@@ -30,7 +30,8 @@ live there; without it every redeploy would invalidate printed QR codes.
 ## 4. Domain
 
 Set the domain in Coolify as `http://…` (not `https://`), so Traefik serves plain
-HTTP. `PUBLIC_BASE_URL` and `ORIGIN` must match it exactly. If you want to try
+HTTP. `PUBLIC_BASE_URL` must match it exactly. A wrong value shows up as
+"Cross-site POST form submissions are forbidden" when a student submits the join form. If you want to try
 without a domain, Coolify's generated `sslip.io` address works too — put that in
 both variables.
 
