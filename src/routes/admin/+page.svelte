@@ -3,6 +3,7 @@
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
+	let testing = $state(false);
 	const when = (unix: number | null) => (unix ? new Date(unix * 1000).toLocaleString() : '');
 </script>
 
@@ -41,13 +42,35 @@
 		{/if}
 		{#if form?.llmTest}
 			{#if form.llmTest.ok}
-				<p class="ok">OK · {form.llmTest.model} answered in {form.llmTest.ms} ms: <code>{form.llmTest.sample}</code></p>
+				<p class="ok">Connection OK · {form.llmTest.model} answered in {form.llmTest.ms} ms: <code>{form.llmTest.sample}</code></p>
+				{#if form.llmTest.generation.ok}
+					<p class="ok">
+						Station generation OK · {form.llmTest.generation.count} options in {(form.llmTest.generation.ms / 1000).toFixed(1)} s.
+						Trap: <em>{form.llmTest.generation.trapTitle}</em>
+					</p>
+					<ul class="titles">
+						{#each form.llmTest.generation.titles as title (title)}<li>{title}</li>{/each}
+					</ul>
+				{:else}
+					<p class="error">Station generation failed after {(form.llmTest.generation.ms / 1000).toFixed(1)} s: {form.llmTest.generation.message}</p>
+				{/if}
 			{:else}
 				<p class="error">Failed after {form.llmTest.ms} ms: {form.llmTest.message}</p>
 			{/if}
 		{/if}
-		<form method="post" action="?/testLlm" use:enhance>
-			<button type="submit" class="inline">Test connection</button>
+		<p class="muted">Runs a tiny request, then one real station generation. The second step can take a minute with slow models.</p>
+		<form
+			method="post"
+			action="?/testLlm"
+			use:enhance={() => {
+				testing = true;
+				return async ({ update }) => {
+					testing = false;
+					await update();
+				};
+			}}
+		>
+			<button type="submit" class="inline" disabled={testing}>{testing ? 'Testing…' : 'Test connection'}</button>
 		</form>
 	</section>
 
@@ -217,6 +240,10 @@
 	.ok {
 		color: #2f8f46;
 		font-weight: 600;
+	}
+	.titles {
+		margin: 0.25rem 0 0.75rem 1.2rem;
+		padding: 0;
 	}
 	.llm code {
 		font-size: 0.9em;
