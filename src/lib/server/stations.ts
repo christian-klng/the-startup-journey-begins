@@ -4,6 +4,7 @@ import { db, schema } from './db/index.js';
 import { getContent, type Station } from './content.js';
 import { generateOptions, type Option } from './llm.js';
 import { getTeamProgress, type Team } from './teams.js';
+import { emitGameEvent } from './events.js';
 
 /**
  * Makes sure every station from stations.yaml has a row with a QR token.
@@ -140,5 +141,6 @@ export function recordDecision(
 	if (done >= total && !team.completedAt) {
 		db.update(schema.teams).set({ completedAt: Math.floor(Date.now() / 1000) }).where(eq(schema.teams.id, team.id)).run();
 	}
+	emitGameEvent({ type: 'decision' });
 	return decision;
 }

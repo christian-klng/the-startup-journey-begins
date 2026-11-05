@@ -4,6 +4,7 @@ import { db, schema } from './db/index.js';
 import { getContent } from './content.js';
 import { getCurrentGame } from './game.js';
 import { MAX_TEAMS } from '$app/env/private';
+import { emitGameEvent } from './events.js';
 
 export type Team = typeof schema.teams.$inferSelect;
 
@@ -28,7 +29,7 @@ export function createTeam(input: { name: string; members: string; topicId: stri
 		.get()!;
 	if (n >= MAX_TEAMS) throw new TeamError('full', 'Maximum number of teams reached');
 
-	return db
+	const team = db
 		.insert(schema.teams)
 		.values({
 			id: randomBytes(12).toString('base64url'),
@@ -39,6 +40,8 @@ export function createTeam(input: { name: string; members: string; topicId: stri
 		})
 		.returning()
 		.get();
+	emitGameEvent({ type: 'team_joined' });
+	return team;
 }
 
 /** Returns the team only if it belongs to the current game; stale cookies from an earlier game are ignored. */
