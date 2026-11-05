@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { db, schema } from '#lib/server/db/index.js';
 import { getCurrentGame, resetGame } from '#lib/server/game.js';
 import { getBoard } from '#lib/server/board.js';
-import { isMockMode } from '#lib/server/llm.js';
+import { getLastLlmError, isMockMode, testLlm } from '#lib/server/llm.js';
 import { SCALEWAY_MODEL } from '$app/env/private';
 import { PUBLIC_BASE_URL } from '$app/env/public';
 
@@ -25,6 +25,7 @@ export const load: PageServerLoad = () => {
 		board,
 		previous,
 		llm: isMockMode() ? 'mock (no API key configured)' : SCALEWAY_MODEL,
+		llmError: getLastLlmError(),
 		baseUrl: PUBLIC_BASE_URL
 	};
 };
@@ -35,5 +36,6 @@ export const actions: Actions = {
 		if (form.get('confirm') !== 'on') return fail(400, { error: 'confirm' });
 		resetGame();
 		return { reset: true };
-	}
+	},
+	testLlm: async () => ({ llmTest: await testLlm() })
 };

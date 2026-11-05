@@ -46,6 +46,17 @@ const Response = z.object({
 
 export const isMockMode = () => !SCALEWAY_API_KEY;
 
+export interface LlmError {
+	at: number;
+	message: string;
+}
+let lastError: LlmError | null = null;
+/** The most recent failure of a real model call, for the admin page. */
+export const getLastLlmError = () => lastError;
+const remember = (e: unknown) => {
+	lastError = { at: Date.now(), message: e instanceof Error ? e.message : String(e) };
+};
+
 function buildMessages(ctx: GenerationContext) {
 	const language = getContent().strings.llm_language ?? 'English';
 	const n = ctx.station.options;
@@ -115,23 +126,30 @@ function mockOptions(ctx: GenerationContext): GeneratedOptions {
 	return finalize('mock', raw);
 }
 
-async function callScaleway(messages: { role: string; content: string }[], signal: AbortSignal) {
-	const res = await fetch(`${SCALEWAY_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
-		method: 'POST',
-		signal,
-		headers: {
-			'content-type': 'application/json',
-			authorization: `Bearer ${SCALEWAY_API_KEY}`
-		},
-		body: JSON.stringify({
-			model: SCALEWAY_MODEL,
-			messages,
-			temperature: 0.8,
-			max_tokens: 1200,
-			response_format: { type: 'json_object' }
-		})
-	});
-	if (!res.ok) throw new Error(`Scaleway ${res.status}: ${(await res.text()).slice(0, 300)}`);
+async function callScaleway(messages: { role: string; content: string }[], signal: AbortSignal, maxTokens = 1200) {
+	const url = `${SCALEWAY_BASE_URL.replace(/\/$/, '')}/chat/completions`;
+	let res: Response;
+	try {
+		res = await fetch(url, {
+			method: 'POST',
+			signal,
+			headers: {
+				'content-type': 'application/json',
+				authorization: `Bearer ${SCALEWAY_API_KEY}`
+			},
+			body: JSON.stringify({
+				model: SCALEWAY_MODEL,
+				messages,
+				temperature: 0.8,
+				max_tokens: maxTokens,
+				response_format: { type: 'json_object' }
+			})
+		});
+	} catch (e) {
+		const reason = e instanceof Error ? (e.name === 'AbortError' ? 'timeout' : e.message) : String(e);
+		throw new Error(`Could not reach ${url}: ${reason}`);
+	}
+	if (!res.ok) throw new Error(`Scaleway ${res.status} for model "${SCALEWAY_MODEL}": ${(await res.text()).slice(0, 300)}`);
 	const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
 	const content = body.choices?.[0]?.message?.content;
 	if (!content) throw new Error('Scaleway returned no content');
@@ -157,10 +175,37 @@ export async function generateOptions(ctx: GenerationContext): Promise<Generated
 			return finalize(SCALEWAY_MODEL, parseResponse(content).options);
 		} catch (e) {
 			lastError = e;
+			remember(e);
 			console.error(`[llm] attempt ${attempt + 1} failed:`, e instanceof Error ? e.message : e);
 		} finally {
 			clearTimeout(timer);
 		}
 	}
 	throw lastError instanceof Error ? lastError : new Error('LLM generation failed');
+}
+
+export type LlmTest = { ok: true; model: string; ms: number; sample: string } | { ok: false; ms: number; message: string };
+
+/** A minimal round trip to the model, used by the admin page to diagnose configuration. */
+export async function testLlm(): Promise<LlmTest> {
+	const started = Date.now();
+	if (isMockMode()) return { ok: false, ms: 0, message: 'No SCALEWAY_API_KEY configured; the app is in mock mode.' };
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), 20_000);
+	try {
+		const content = await callScaleway(
+			[
+				{ role: 'system', content: 'Answer with JSON only.' },
+				{ role: 'user', content: 'Reply with {"hello":"world"}' }
+			],
+			controller.signal,
+			50
+		);
+		return { ok: true, model: SCALEWAY_MODEL, ms: Date.now() - started, sample: content.slice(0, 120) };
+	} catch (e) {
+		remember(e);
+		return { ok: false, ms: Date.now() - started, message: e instanceof Error ? e.message : String(e) };
+	} finally {
+		clearTimeout(timer);
+	}
 }

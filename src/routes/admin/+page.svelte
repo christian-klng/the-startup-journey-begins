@@ -34,6 +34,23 @@
 		</div>
 	</section>
 
+	<section class="card llm">
+		<h2>Model connection</h2>
+		{#if data.llmError}
+			<p class="error">Last failure {when(Math.floor(data.llmError.at / 1000))}: {data.llmError.message}</p>
+		{/if}
+		{#if form?.llmTest}
+			{#if form.llmTest.ok}
+				<p class="ok">OK · {form.llmTest.model} answered in {form.llmTest.ms} ms: <code>{form.llmTest.sample}</code></p>
+			{:else}
+				<p class="error">Failed after {form.llmTest.ms} ms: {form.llmTest.message}</p>
+			{/if}
+		{/if}
+		<form method="post" action="?/testLlm" use:enhance>
+			<button type="submit" class="inline">Test connection</button>
+		</form>
+	</section>
+
 	<nav class="links">
 		<a class="button" href="/admin/qr">Printable QR sheet</a>
 		<a class="button" href="/admin/export.csv">Export CSV</a>
@@ -201,5 +218,12 @@
 	.ok {
 		color: #2f8f46;
 		font-weight: 600;
+	}
+	.llm code {
+		font-size: 0.9em;
+		word-break: break-all;
+	}
+	button.inline {
+		width: auto;
 	}
 </style>
