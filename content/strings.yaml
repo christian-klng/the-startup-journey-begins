@@ -17,3 +17,11 @@ join_error_full: The class is full. Please ask your teacher.
 join_error_fields: Please fill in all fields.
 me_your_startup: Your startup
 me_decisions: Your decisions so far
+station_label: Station
+station_your_decision: Your decision
+station_back: Back to your startup
+station_thinking: Your AI co-founder is thinking…
+station_retry: Try again
+station_error: That did not work. Pick an option or write at least a few words.
+# Language the LLM writes its options in.
+llm_language: English

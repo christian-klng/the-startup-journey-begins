@@ -32,6 +32,7 @@
 			};
 		}}
 	>
+		<input type="hidden" name="next" value={data.next} />
 		<label>
 			<span>{s.join_team_name}</span>
 			<input name="name" required minlength="2" maxlength="60" value={form?.values.name ?? ''} autocomplete="off" />
