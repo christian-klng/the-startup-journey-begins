@@ -14,6 +14,13 @@ npm run dev
 Content lives in `content/*.yaml` (slides, stations, topics, UI strings). It is
 validated on start; errors name the file and field.
 
+## Running a class
+
+1. Open `/admin` (basic auth, password from `ADMIN_PASSWORD`), print the QR sheet.
+2. Show `/present` on the projector; arrow keys move, `F` is fullscreen.
+3. Students scan the join code, then the stations around the room.
+4. Afterwards export the CSV from `/admin`, and start a new game for the next class.
+
 ## Database
 
 SQLite at `DATABASE_PATH` (default `./data/game.sqlite`). Migrations in

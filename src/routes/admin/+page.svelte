@@ -1,16 +1,205 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
-	let { data }: PageProps = $props();
+
+	let { data, form }: PageProps = $props();
+	const when = (unix: number | null) => (unix ? new Date(unix * 1000).toLocaleString() : '');
 </script>
 
-<svelte:head><title>Admin</title></svelte:head>
+<svelte:head><title>Admin · The Startup Journey Begins</title></svelte:head>
 
-<main class="phone">
+<main class="admin">
 	<h1>Admin</h1>
-	<ul>
-		<li>Game #{data.game.id}, started {new Date(data.game.startedAt * 1000).toLocaleString()}, {data.game.teams} teams</li>
-		<li>LLM: {data.llm}</li>
-		<li>Public URL: {data.baseUrl}</li>
-	</ul>
-	<p><a href="/admin/qr">Printable QR sheet</a> · <a href="/present">Presenter view</a></p>
+
+	<section class="cards">
+		<div class="card">
+			<p class="label">Current game</p>
+			<p class="value">#{data.game.id}</p>
+			<p class="muted">started {when(data.game.startedAt)}</p>
+		</div>
+		<div class="card">
+			<p class="label">Teams</p>
+			<p class="value">{data.board.teams.length}</p>
+			<p class="muted">{data.board.teams.filter((t) => t.completed).length} completed</p>
+		</div>
+		<div class="card">
+			<p class="label">Decisions</p>
+			<p class="value">{data.board.decisionsTotal}</p>
+			<p class="muted">{data.board.trapsTotal} traps taken</p>
+		</div>
+		<div class="card">
+			<p class="label">LLM</p>
+			<p class="value small">{data.llm}</p>
+			<p class="muted">{data.baseUrl}</p>
+		</div>
+	</section>
+
+	<nav class="links">
+		<a class="button" href="/admin/qr">Printable QR sheet</a>
+		<a class="button" href="/admin/export.csv">Export CSV</a>
+		<a class="button secondary" href="/present" target="_blank">Open presenter</a>
+	</nav>
+
+	<section>
+		<h2>Teams in this game</h2>
+		{#if data.board.teams.length === 0}
+			<p class="muted">Nobody has joined yet.</p>
+		{:else}
+			<table>
+				<thead>
+					<tr><th>Team</th><th>Members</th><th>Topic</th><th>Progress</th><th>Traps</th><th>Last station</th></tr>
+				</thead>
+				<tbody>
+					{#each data.board.teams as t (t.id)}
+						<tr class:completed={t.completed}>
+							<td>{t.name}</td>
+							<td>{t.members}</td>
+							<td>{t.topic}</td>
+							<td>{t.done} / {data.board.total}</td>
+							<td>{t.traps}</td>
+							<td>{t.lastStation ?? '—'}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
+	</section>
+
+	<section class="danger">
+		<h2>Start a new game</h2>
+		<p class="muted">
+			Ends the current game and starts an empty one for the next class. Phones that joined this game are
+			sent back to the join page. Old data stays available for export below.
+		</p>
+		{#if form?.reset}<p class="ok">A new game was started.</p>{/if}
+		{#if form?.error}<p class="error">Please tick the confirmation first.</p>{/if}
+		<form method="post" action="?/reset" use:enhance>
+			<label class="confirm"><input type="checkbox" name="confirm" /> I want to end the current game</label>
+			<button type="submit">Start a new game</button>
+		</form>
+	</section>
+
+	{#if data.previous.length}
+		<section>
+			<h2>Previous games</h2>
+			<table>
+				<thead><tr><th>Game</th><th>Started</th><th>Ended</th><th>Teams</th><th></th></tr></thead>
+				<tbody>
+					{#each data.previous as g (g.id)}
+						<tr>
+							<td>#{g.id}</td>
+							<td>{when(g.startedAt)}</td>
+							<td>{when(g.endedAt)}</td>
+							<td>{g.teams}</td>
+							<td><a href="/admin/export.csv?game={g.id}">CSV</a></td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</section>
+	{/if}
 </main>
+
+<style>
+	.admin {
+		max-width: 64rem;
+		margin: 0 auto;
+		padding: 1.5rem 1rem 3rem;
+	}
+	section {
+		margin-bottom: 2rem;
+	}
+	.cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+		gap: 1rem;
+	}
+	.card {
+		background: var(--surface);
+		border-radius: var(--radius);
+		padding: 1rem;
+	}
+	.card p {
+		margin: 0;
+	}
+	.label {
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		font-size: 0.75rem;
+		color: var(--muted);
+	}
+	.value {
+		font-size: 2rem;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+	.value.small {
+		font-size: 1.1rem;
+		word-break: break-all;
+	}
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-bottom: 2rem;
+	}
+	.button {
+		display: inline-block;
+		text-decoration: none;
+		font-weight: 600;
+		padding: 0.7rem 1.1rem;
+		border-radius: var(--radius);
+		background: var(--accent);
+		color: #fff;
+	}
+	.button.secondary {
+		background: var(--surface);
+		color: var(--text);
+		border: 2px solid var(--border);
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		background: var(--surface);
+		border-radius: var(--radius);
+		overflow: hidden;
+	}
+	th,
+	td {
+		text-align: left;
+		padding: 0.6rem 0.8rem;
+		border-bottom: 1px solid var(--border);
+	}
+	th {
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--muted);
+	}
+	tr.completed td:first-child {
+		color: #2f8f46;
+		font-weight: 600;
+	}
+	.danger {
+		border: 2px solid var(--danger);
+		border-radius: var(--radius);
+		padding: 1rem;
+	}
+	.danger form {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 24rem;
+	}
+	.danger button {
+		background: var(--danger);
+	}
+	.confirm {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	.ok {
+		color: #2f8f46;
+		font-weight: 600;
+	}
+</style>
