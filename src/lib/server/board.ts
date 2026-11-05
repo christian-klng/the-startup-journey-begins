@@ -2,6 +2,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { db, schema } from './db/index.js';
 import { getContent } from './content.js';
 import { getCurrentGame } from './game.js';
+import { summarizeDecision } from './decisions.js';
 
 export interface BoardTeam {
 	id: string;
@@ -34,7 +35,7 @@ export function getBoard(): Board {
 		.select({
 			teamId: schema.decisions.teamId,
 			stationId: schema.decisions.stationId,
-			optionIndex: schema.decisions.optionIndex,
+			choicesJson: schema.decisions.choicesJson,
 			ownText: schema.decisions.ownText,
 			wasTrap: schema.decisions.wasTrap,
 			createdAt: schema.decisions.createdAt,
@@ -59,11 +60,8 @@ export function getBoard(): Board {
 			completed: mine.length >= content.stations.length,
 			lastStation: mine.length ? stationTitle(mine[mine.length - 1].stationId) : null,
 			decisions: mine.map((d) => {
-				let choice = d.ownText ?? '';
-				if (d.optionIndex !== null && d.optionsJson) {
-					choice = (JSON.parse(d.optionsJson) as { title: string }[])[d.optionIndex]?.title ?? choice;
-				}
-				return { station: stationTitle(d.stationId), choice, wasTrap: d.wasTrap, own: d.optionIndex === null };
+				const s = summarizeDecision(d.optionsJson, d.choicesJson, d.ownText);
+				return { station: stationTitle(d.stationId), choice: s.text, wasTrap: d.wasTrap, own: s.own !== null };
 			})
 		};
 	});

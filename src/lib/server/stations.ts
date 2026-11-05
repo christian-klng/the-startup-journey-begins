@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { db, schema } from './db/index.js';
-import { getContent, type Station } from './content.js';
+import { getContent, maxPicks, type Station } from './content.js';
 import { generateOptions, type Option } from './llm.js';
 import { getTeamProgress, type Team } from './teams.js';
 import { emitGameEvent } from './events.js';
@@ -77,7 +77,7 @@ export function getOrCreateGeneration(team: Team, station: Station): Promise<Gen
 	if (running) return running;
 
 	const topic = getContent().topics.find((t) => t.id === team.topicId) ?? { id: team.topicId, title: team.topicId };
-	const previous = getTeamProgress(team).decisions.map(({ title, question, choice }) => ({ title, question, choice }));
+	const previous = getTeamProgress(team).decisions.map(({ title, question, choice, detail }) => ({ title, question, choice, detail }));
 
 	const promise = generateOptions({ members: team.members, topic, station, previous })
 		.then((result) =>
@@ -99,30 +99,33 @@ export function getOrCreateGeneration(team: Team, station: Station): Promise<Gen
 }
 
 export class DecisionError extends Error {
-	constructor(public code: 'already_decided' | 'no_generation' | 'invalid_option' | 'empty_text') {
+	constructor(public code: 'already_decided' | 'no_generation' | 'invalid_option' | 'empty_text' | 'nothing_chosen' | 'too_many') {
 		super(code);
 	}
 }
 
+/**
+ * Records the team's picks: option indexes and/or an own idea. The own idea counts as one pick
+ * towards the station's limit.
+ */
 export function recordDecision(
 	team: Team,
 	station: Station,
-	input: { optionIndex: number | null; ownText: string | null }
+	input: { optionIndexes: number[]; ownText: string | null }
 ): Decision {
 	if (getDecision(team, station)) throw new DecisionError('already_decided');
 	const gen = getGeneration(team, station);
 	if (!gen) throw new DecisionError('no_generation');
 
-	let wasTrap = false;
-	if (input.optionIndex !== null) {
-		const options = parseOptions(gen);
-		if (!Number.isInteger(input.optionIndex) || input.optionIndex < 0 || input.optionIndex >= options.length) {
-			throw new DecisionError('invalid_option');
-		}
-		wasTrap = input.optionIndex === gen.trapIndex;
-	} else if (!input.ownText || input.ownText.length < 3) {
-		throw new DecisionError('empty_text');
-	}
+	const options = parseOptions(gen);
+	const indexes = [...new Set(input.optionIndexes)].sort((a, b) => a - b);
+	if (indexes.some((i) => !Number.isInteger(i) || i < 0 || i >= options.length)) throw new DecisionError('invalid_option');
+	const ownText = input.ownText?.trim() ? input.ownText.trim() : null;
+	if (input.ownText !== null && !ownText) throw new DecisionError('empty_text');
+	if (ownText && ownText.length < 3) throw new DecisionError('empty_text');
+	const picks = indexes.length + (ownText ? 1 : 0);
+	if (picks === 0) throw new DecisionError('nothing_chosen');
+	if (picks > maxPicks(station)) throw new DecisionError('too_many');
 
 	const decision = db
 		.insert(schema.decisions)
@@ -130,9 +133,9 @@ export function recordDecision(
 			teamId: team.id,
 			stationId: station.id,
 			generationId: gen.id,
-			optionIndex: input.optionIndex,
-			ownText: input.optionIndex === null ? input.ownText : null,
-			wasTrap
+			choicesJson: JSON.stringify(indexes),
+			ownText,
+			wasTrap: indexes.includes(gen.trapIndex)
 		})
 		.returning()
 		.get();

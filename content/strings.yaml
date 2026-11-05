@@ -7,7 +7,9 @@ join_submit: Let's go
 me_progress: "{done} of {total} stations done"
 me_next: Find the next QR code in the room.
 me_complete: Your journey is complete!
-station_choose: Choose one option or write your own idea.
+station_choose_single: Choose one option or write your own idea.
+station_choose_multi: "Choose up to {max}. Founders have to focus."
+station_picked: "{n} of {max} chosen"
 station_own_idea: Our own idea
 station_submit: Decide
 station_trap_reveal: That one was the trap. Did you notice why?
@@ -21,6 +23,7 @@ station_your_decision: Your decision
 station_back: Back to your startup
 station_thinking: Your AI co-founder is thinking…
 station_retry: Try again
-station_error: That did not work. Pick an option or write at least a few words.
-# Language the LLM writes its options in.
+station_error: That did not work. Pick at least one option, not more than allowed, and write a few words for your own idea.
+# Language the LLM writes its options in, and who the players are (used in the prompt).
 llm_language: English
+llm_audience: Master students at a business school who already know economics and management basics

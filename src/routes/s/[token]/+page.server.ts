@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getContent } from '#lib/server/content.js';
+import { getContent, maxPicks } from '#lib/server/content.js';
+import { summarizeDecision } from '#lib/server/decisions.js';
 import {
 	DecisionError,
 	getDecision,
@@ -21,16 +22,23 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
 	const { strings } = getContent();
 	const base = {
 		strings,
-		station: { id: station.id, title: station.title, question: station.question, hint: station.hint, reveal: station.reveal },
+		station: {
+			id: station.id,
+			title: station.title,
+			question: station.question,
+			hint: station.hint,
+			reveal: station.reveal,
+			select: station.select,
+			max: maxPicks(station)
+		},
 		progress: (({ done, total }) => ({ done, total }))(getTeamProgress(team))
 	};
 
 	const decision = getDecision(team, station);
 	if (decision) {
 		const gen = getGeneration(team, station);
-		const choice =
-			decision.optionIndex !== null && gen ? parseOptions(gen)[decision.optionIndex] : { title: decision.ownText ?? '', text: '' };
-		return { ...base, decided: { choice, wasTrap: decision.wasTrap, justNow: url.searchParams.has('done') } };
+		const summary = summarizeDecision(gen?.optionsJson ?? null, decision.choicesJson, decision.ownText);
+		return { ...base, decided: { picked: summary.picked, own: summary.own, wasTrap: decision.wasTrap } };
 	}
 
 	// Streamed: the page renders immediately and shows a spinner until the LLM answers.
@@ -46,15 +54,19 @@ export const actions: Actions = {
 		if (!team) redirect(303, '/join');
 
 		const form = await request.formData();
-		const raw = String(form.get('option') ?? '');
+		const raw = form.getAll('option').map(String);
+		const wantsOwn = raw.includes('own');
+		const optionIndexes = raw.filter((v) => v !== 'own').map(Number);
 		const ownText = String(form.get('own') ?? '')
 			.replace(/\s+/g, ' ')
 			.trim()
 			.slice(0, 400);
-		const optionIndex = raw === 'own' ? null : Number(raw);
 
 		try {
-			recordDecision(team, station, { optionIndex: Number.isNaN(optionIndex) ? -1 : optionIndex, ownText: ownText || null });
+			recordDecision(team, station, {
+				optionIndexes: optionIndexes.some(Number.isNaN) ? [-1] : optionIndexes,
+				ownText: wantsOwn ? ownText : null
+			});
 		} catch (e) {
 			if (e instanceof DecisionError) {
 				if (e.code === 'already_decided') redirect(303, `/s/${params.token}`);

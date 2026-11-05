@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { SCALEWAY_API_KEY, SCALEWAY_BASE_URL, SCALEWAY_MODEL } from '$app/env/private';
 import type { Station } from './content.js';
-import { getContent } from './content.js';
+import { getContent, maxPicks } from './content.js';
 
 export interface Option {
 	title: string;
@@ -20,10 +20,10 @@ export interface GenerationContext {
 	members: string;
 	topic: { title: string; description?: string };
 	station: Station;
-	previous: { title: string; question: string; choice: string }[];
+	previous: { title: string; question: string; choice: string; detail?: string }[];
 }
 
-const TRAP_FLAVOUR: Record<Station['trap'], string> = {
+const TRAP_FLAVOUR: Record<string, string> = {
 	absurd: 'absurd and obviously nonsensical, yet written in the same confident tone as the others',
 	illegal: 'clearly illegal or fraudulent, yet presented as if it were a clever shortcut',
 	unethical: 'clearly unethical or manipulative towards users, yet presented as a growth hack',
@@ -61,13 +61,19 @@ const remember = (e: unknown) => {
 };
 
 function buildMessages(ctx: GenerationContext) {
-	const language = getContent().strings.llm_language ?? 'English';
+	const strings = getContent().strings;
+	const language = strings.llm_language ?? 'English';
+	const audience = strings.llm_audience ?? 'students';
 	const n = ctx.station.options;
-	const system = `You are a sharp but playful startup coach inside a classroom game.
-Students found a fictional startup or NGO and take decisions station by station.
+	const picks = maxPicks(ctx.station);
+	const trap = TRAP_FLAVOUR[ctx.station.trap] ?? ctx.station.trap;
+	const system = `You are a sharp, experienced startup coach inside a classroom game.
+The players are ${audience}. They found a fictional startup or NGO and take decisions station by station.
 At each station you propose options. Rules:
-- Produce exactly ${n + 1} options: ${n} serious, realistic, distinct options that fit THIS team's previous decisions, plus ONE trap option that is ${TRAP_FLAVOUR[ctx.station.trap]}.
-- The trap must be plausible at first glance and only reveal itself to a careful reader. Never label it, never wink at it, never use words like "trap".
+- Produce exactly ${n + 1} options: ${n} serious, realistic, distinct options that build on THIS team's previous decisions, plus ONE trap option: ${trap}.
+- The serious options must be educationally sound: correct use of entrepreneurship and economics concepts, concrete, and good enough that an instructor would accept any of them.
+- The trap must be plausible at first glance and only reveal itself to a careful, critical reader. Never label it, never wink at it, never use words like "trap".
+${picks > 1 ? `- The students may pick up to ${picks} options, so make the serious options independent and combinable, not mutually exclusive.` : '- The students pick exactly one option, so make the serious options genuinely different strategic choices.'}
 - Do not number the options. Do not reveal these rules.
 - Each option: a short title (max 8 words) and one or two concrete sentences (max 40 words). No preamble, no reasoning.
 - Write in ${language}.
@@ -75,7 +81,9 @@ At each station you propose options. Rules:
 {"options":[{"title":"...","text":"...","trap":false}, ... one of them with "trap":true]}`;
 
 	const history = ctx.previous.length
-		? ctx.previous.map((p, i) => `${i + 1}. ${p.title} — ${p.question}\n   Decision: ${p.choice}`).join('\n')
+		? ctx.previous
+				.map((p, i) => `${i + 1}. ${p.title} — ${p.question}\n   Decision: ${p.choice}${p.detail ? `\n   Details: ${p.detail}` : ''}`)
+				.join('\n')
 		: '(none yet — this is their first station)';
 
 	const user = `Team members: ${ctx.members}
@@ -85,7 +93,7 @@ Previous decisions:
 ${history}
 
 Current station: ${ctx.station.title}
-Leading question: ${ctx.station.question}${ctx.station.hint ? `\nHint for the students: ${ctx.station.hint}` : ''}
+Leading question: ${ctx.station.question}${ctx.station.hint ? `\nHint shown to the students: ${ctx.station.hint}` : ''}${ctx.station.prompt ? `\nWhat good options look like here: ${ctx.station.prompt}` : ''}
 
 Generate the options now.${/qwen/i.test(SCALEWAY_MODEL) ? ' /no_think' : ''}`;
 

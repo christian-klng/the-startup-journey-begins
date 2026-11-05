@@ -15,6 +15,20 @@
       "when": 1793876063808,
       "tag": "0001_drop_team_name",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793878474094,
+      "tag": "0002_add_choices_json",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793878474467,
+      "tag": "0003_drop_option_index",
+      "breakpoints": true
     }
   ]
 }

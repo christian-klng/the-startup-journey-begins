@@ -4,13 +4,26 @@
 
 	let { data, form }: PageProps = $props();
 	const s = $derived(data.strings);
-	let selected = $state<string>('');
+	const multi = $derived(data.station.select === 'multi');
+	let single = $state<string>('');
+	let picked = $state<string[]>([]);
 	let own = $state('');
 	let submitting = $state(false);
 	$effect(() => {
 		if (form?.own) own = form.own;
 	});
-	const canSubmit = $derived(selected !== '' && (selected !== 'own' || own.trim().length >= 3));
+	const selected = $derived(multi ? picked : single ? [single] : []);
+	const full = $derived(multi && picked.length >= data.station.max);
+	const canSubmit = $derived(
+		selected.length > 0 && selected.length <= data.station.max && (!selected.includes('own') || own.trim().length >= 3)
+	);
+	const isOn = (value: string) => selected.includes(value);
+	const instruction = $derived(
+		multi ? s.station_choose_multi.replace('{max}', String(data.station.max)) : s.station_choose_single
+	);
+	const counter = $derived(
+		multi ? s.station_picked.replace('{n}', String(picked.length)).replace('{max}', String(data.station.max)) : ''
+	);
 </script>
 
 <svelte:head><title>{data.station.title} · {s.app_title}</title></svelte:head>
@@ -26,8 +39,14 @@
 	{#if data.decided}
 		<section class="card decided">
 			<p class="eyebrow">{s.station_your_decision}</p>
-			<p class="choice">{data.decided.choice.title}</p>
-			{#if data.decided.choice.text}<p class="muted">{data.decided.choice.text}</p>{/if}
+			{#each data.decided.picked as o (o.title)}
+				<p class="choice">{o.title}</p>
+				<p class="muted">{o.text}</p>
+			{/each}
+			{#if data.decided.own}
+				<p class="choice">{s.station_own_idea}</p>
+				<p class="muted">{data.decided.own}</p>
+			{/if}
 		</section>
 		{#if data.decided.wasTrap && data.station.reveal === 'immediate'}
 			<section class="card trap">
@@ -43,7 +62,7 @@
 				<p>{s.station_thinking}</p>
 			</section>
 		{:then options}
-			<p class="instruction">{s.station_choose}</p>
+			<p class="instruction">{instruction}</p>
 			<form
 				method="post"
 				action="?/decide"
@@ -57,18 +76,37 @@
 			>
 				<div class="options">
 					{#each options as option, i (i)}
-						<label class="option" class:selected={selected === String(i)}>
-							<input type="radio" name="option" value={i} bind:group={selected} />
+						<label class="option" class:selected={isOn(String(i))} class:dimmed={full && !isOn(String(i))}>
+							{#if multi}
+								<input type="checkbox" name="option" value={String(i)} bind:group={picked} disabled={full && !isOn(String(i))} />
+							{:else}
+								<input type="radio" name="option" value={String(i)} bind:group={single} />
+							{/if}
 							<span class="title">{option.title}</span>
 							<span class="text">{option.text}</span>
 						</label>
 					{/each}
-					<label class="option" class:selected={selected === 'own'}>
-						<input type="radio" name="option" value="own" bind:group={selected} />
+					<label class="option" class:selected={isOn('own')} class:dimmed={full && !isOn('own')}>
+						{#if multi}
+							<input type="checkbox" name="option" value="own" bind:group={picked} disabled={full && !isOn('own')} />
+						{:else}
+							<input type="radio" name="option" value="own" bind:group={single} />
+						{/if}
 						<span class="title">{s.station_own_idea}</span>
-						<textarea name="own" rows="3" maxlength="400" bind:value={own} onfocus={() => (selected = 'own')}></textarea>
+						<textarea
+							name="own"
+							rows="3"
+							maxlength="400"
+							bind:value={own}
+							onfocus={() => {
+								if (multi) {
+									if (!picked.includes('own') && !full) picked = [...picked, 'own'];
+								} else single = 'own';
+							}}
+						></textarea>
 					</label>
 				</div>
+				{#if multi}<p class="counter muted">{counter}</p>{/if}
 				<button type="submit" disabled={!canSubmit || submitting}>{s.station_submit}</button>
 			</form>
 		{:catch}
@@ -151,7 +189,15 @@
 		border-color: var(--accent);
 		background: var(--accent-soft);
 	}
-	.option input[type='radio'] {
+	.option.dimmed {
+		opacity: 0.45;
+	}
+	.counter {
+		text-align: center;
+		margin: -0.5rem 0 1rem;
+	}
+	.option input[type='radio'],
+	.option input[type='checkbox'] {
 		grid-row: span 2;
 		margin-top: 0.3rem;
 	}

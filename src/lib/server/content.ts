@@ -17,8 +17,15 @@ const Station = z.object({
 	title: z.string(),
 	question: z.string(),
 	hint: z.string().optional(),
-	options: z.number().int().min(2).max(6).default(4),
-	trap: z.enum(['absurd', 'illegal', 'unethical', 'ruinous']).default('absurd'),
+	/** Educational guidance for the model: what makes a good option at this station. */
+	prompt: z.string().optional(),
+	/** single: pick exactly one. multi: pick up to `max` (default 2, founders must focus). */
+	select: z.enum(['single', 'multi']).default('single'),
+	max: z.number().int().min(1).max(6).optional(),
+	/** Number of serious options; one trap is always added. */
+	options: z.number().int().min(2).max(7).default(4),
+	/** absurd | illegal | unethical | ruinous, or a free-text description of the trap for this station. */
+	trap: z.string().default('absurd'),
 	reveal: z.enum(['immediate', 'end', 'never']).default('immediate')
 });
 
@@ -75,6 +82,9 @@ export function getContent(): Content {
 	};
 	return cache;
 }
+
+/** How many picks a station allows. */
+export const maxPicks = (station: Station) => (station.select === 'single' ? 1 : (station.max ?? 2));
 
 export function t(key: string): string {
 	return getContent().strings[key] ?? key;

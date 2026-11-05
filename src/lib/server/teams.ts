@@ -5,6 +5,7 @@ import { getContent } from './content.js';
 import { getCurrentGame } from './game.js';
 import { MAX_TEAMS } from '$app/env/private';
 import { emitGameEvent } from './events.js';
+import { summarizeDecision } from './decisions.js';
 
 export type Team = typeof schema.teams.$inferSelect;
 
@@ -60,7 +61,10 @@ export interface TeamProgress {
 		stationId: string;
 		title: string;
 		question: string;
+		/** Titles of the picks, plus the own idea. */
 		choice: string;
+		/** Option texts, for the model's context. */
+		detail: string;
 		wasTrap: boolean;
 		createdAt: number;
 	}[];
@@ -71,7 +75,7 @@ export function getTeamProgress(team: Team): TeamProgress {
 	const rows = db
 		.select({
 			stationId: schema.decisions.stationId,
-			optionIndex: schema.decisions.optionIndex,
+			choicesJson: schema.decisions.choicesJson,
 			ownText: schema.decisions.ownText,
 			wasTrap: schema.decisions.wasTrap,
 			createdAt: schema.decisions.createdAt,
@@ -86,17 +90,15 @@ export function getTeamProgress(team: Team): TeamProgress {
 	const decisions = rows.flatMap((r) => {
 		const station = content.stations.find((s) => s.id === r.stationId);
 		if (!station) return [];
-		let choice = r.ownText ?? '';
-		if (r.optionIndex !== null && r.optionsJson) {
-			const options = JSON.parse(r.optionsJson) as { title: string }[];
-			choice = options[r.optionIndex]?.title ?? choice;
-		}
+		const summary = summarizeDecision(r.optionsJson, r.choicesJson, r.ownText);
+		const detail = [...summary.picked.map((o) => `${o.title}: ${o.text}`), ...(summary.own ? [`Own idea: ${summary.own}`] : [])].join(' / ');
 		return [
 			{
 				stationId: r.stationId,
 				title: station.title,
 				question: station.question,
-				choice,
+				choice: summary.text,
+				detail,
 				wasTrap: r.wasTrap,
 				createdAt: r.createdAt
 			}

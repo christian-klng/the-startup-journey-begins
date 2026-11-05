@@ -19,8 +19,7 @@
 - type: join
   title: Found your startup
   wifi:
-    ssid: Classroom-WiFi
-    password: change-me
+    ssid: CIC Guest
 - type: board
   title: Where is everybody?
 - type: conclusion

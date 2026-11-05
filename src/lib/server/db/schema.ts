@@ -49,8 +49,8 @@ export const decisions = sqliteTable('decisions', {
 		.references(() => teams.id),
 	stationId: text('station_id').notNull(),
 	generationId: integer('generation_id').references(() => generations.id),
-	optionIndex: integer('option_index'), // null when the team typed their own idea
-	ownText: text('own_text'),
+	choicesJson: text('choices_json').notNull().default('[]'), // indexes into the generation's options
+	ownText: text('own_text'), // the team's own idea, may accompany chosen options
 	wasTrap: integer('was_trap', { mode: 'boolean' }).notNull().default(false),
 	createdAt: integer('created_at').notNull().default(now)
 });

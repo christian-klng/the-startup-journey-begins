@@ -1,39 +1,181 @@
 # The QR stations in the classroom. Order here = order on the printed sheet.
-# id: slug, must stay stable once QR codes are printed.
-# options: number of serious options the LLM generates (one trap is always added).
-# trap: flavour of the trap option (absurd | illegal | unethical | ruinous).
-# reveal: when students learn that they picked the trap (immediate | end | never).
+#
+# id:       slug, must stay stable once QR codes are printed
+# question: the leading question shown to students
+# hint:     one line shown to students under the question
+# prompt:   guidance for the model on what good options look like here (not shown to students)
+# select:   single | multi   (multi defaults to max 2 picks, because founders must focus)
+# max:      pick limit for multi-select stations
+# options:  number of serious options the model generates; one trap is always added
+# trap:     absurd | illegal | unethical | ruinous, or a free-text description of the trap
+# reveal:   immediate | end | never  (when students learn that they picked the trap)
+
 - id: problem
-  title: The problem
-  question: Who exactly has this problem, and when does it hurt most?
-  hint: Be concrete. "Everyone" is not a target group.
+  title: Define the problem
+  question: Which problem is urgent and relevant enough that people would act on it today?
+  hint: A "hair on fire" problem beats a nice-to-have. Say who has it and when it hurts.
+  select: single
   options: 4
-  trap: absurd
+  prompt: >-
+    Propose concrete problems inside the team's problem space. Each option names a specific
+    group of people, the situation in which the problem occurs, how often, and what it costs
+    them in time, money, stress or missed opportunity. Prefer urgent, frequent and expensive
+    problems over mild annoyances. Avoid vague societal statements.
+  trap: >-
+    a problem that sounds important but that nobody personally feels or would act on
+    (too abstract, too universal, or a problem of a different group than the one named)
   reveal: immediate
+
+- id: validate
+  title: Validate the problem
+  question: Which questions would you ask in problem interviews to find out whether the problem is real?
+  hint: Think Mom Test — ask about their life and past behaviour, not about your idea.
+  select: multi
+  max: 2
+  options: 5
+  prompt: >-
+    Propose interview questions that follow the Mom Test (Rob Fitzpatrick): ask about the
+    person's life and concrete past behaviour, not about opinions or the team's idea; ask what
+    they did the last time the problem occurred, what it cost them, what they tried, and who
+    else was involved; avoid hypotheticals, compliments and leading phrasing. Each option is
+    one actual question plus a short note on what the answer reveals.
+  trap: >-
+    a leading or hypothetical question that sounds professional but only produces polite
+    opinions, such as asking whether they would use or pay for the idea
+  reveal: immediate
+
+- id: alternatives
+  title: Current alternatives
+  question: How do people deal with this problem today?
+  hint: Doing nothing, a spreadsheet, a friend, an incumbent product — all count.
+  select: multi
+  max: 2
+  options: 5
+  prompt: >-
+    Propose realistic ways the chosen group handles the problem right now, including doing
+    nothing, manual workarounds, generic tools, paying a person, or existing products and
+    services. For each, say what people like about it and where it falls short. The
+    alternatives define the real competition and the bar a new solution must clear.
+  trap: >-
+    an alternative that does not actually exist, or one that this group would never
+    realistically use
+  reveal: immediate
+
+- id: audience
+  title: Target audience
+  question: Who exactly are you building for, and what drives them?
+  hint: A narrow beachhead segment beats "everyone". Say whether it is B2B or B2C.
+  select: single
+  options: 4
+  prompt: >-
+    Propose narrow, reachable target segments consistent with the problem and alternatives
+    chosen so far. Each option states whether it is B2B or B2C, the defining characteristics
+    of the segment (role, situation, size, behaviour), their main motivation, and why they are
+    a good first segment (urgency, reachability, willingness to pay). Segments must be
+    specific enough to find ten of them next week.
+  trap: >-
+    a segment that is far too broad to serve, or one that contradicts the problem chosen
+    earlier while sounding attractive because of its size
+  reveal: immediate
+
+- id: value
+  title: Value proposition
+  question: What do you improve or reduce for these people?
+  hint: Gains created or pains relieved — time, money, risk, effort, status.
+  select: single
+  options: 4
+  prompt: >-
+    Propose value propositions for the chosen segment and problem, each framed as a concrete
+    outcome: what gets faster, cheaper, safer, easier or more rewarding, and by roughly how
+    much. Each should be something the segment would recognise from the earlier interviews,
+    not a feature list. Make the options genuinely different bets on what matters most.
+  trap: >-
+    a value proposition that addresses something the segment never complained about, or that
+    solves a different problem than the one chosen, while sounding like a strong pitch
+  reveal: immediate
+
+- id: first-customer
+  title: Ideal first customer
+  question: Who pays first, and why would they?
+  hint: The user and the buyer are not always the same person.
+  select: single
+  options: 4
+  prompt: >-
+    Propose early-adopter customer profiles who have the budget, the urgency and the
+    authority to pay for a first version. Distinguish buyer from user where relevant (B2B).
+    Each option explains why this customer would pay now despite an unfinished product:
+    acute pain, budget already spent on alternatives, status as an innovator, or a
+    regulatory deadline.
+  trap: >-
+    a prestigious first customer who could never realistically buy from a brand-new startup,
+    such as a large corporation with a long procurement process or a public authority, or a
+    customer who benefits but would never pay
+  reveal: immediate
+
 - id: solution
-  title: The solution
-  question: What is the smallest thing you could build that already helps?
-  hint: Think of a first version you could test next week.
-  options: 4
-  trap: absurd
+  title: Solution
+  question: Which features make the first version work?
+  hint: An MVP you could build in a few weeks, not the full vision.
+  select: multi
+  max: 2
+  options: 5
+  prompt: >-
+    Propose main features for a minimum viable product that delivers the chosen value
+    proposition. Each option names the feature, explains briefly how it works technically
+    (which data, which components, manual or automated), and what it lets the customer do.
+    Features must be buildable within weeks by a small team, possibly with manual work behind
+    the scenes. Keep them independent so two can be combined.
+  trap: >-
+    a feature that is technically impossible or wildly over-engineered for a first version,
+    dressed up in fashionable technology terms
   reveal: immediate
-- id: attention
-  title: Promoting your idea
-  question: Where is the underpriced attention?
-  hint: Where does your target group spend time and nobody competes for it yet?
-  options: 4
-  trap: unethical
+
+- id: means
+  title: What you bring to the table
+  question: Which means do you already have that you can start with tomorrow?
+  hint: Effectuation — who you are, what you know, whom you know, and what you can afford to lose.
+  select: multi
+  max: 4
+  options: 6
+  prompt: >-
+    Follow effectuation theory (Sarasvathy, bird-in-hand principle). Propose means a team of
+    business master students realistically has: who they are (traits, skills, interests),
+    what they know (education, previous projects, domain exposure), whom they know (university
+    networks, family, former employers, student organisations), plus affordable-loss moves
+    such as limited time or small budgets. Each option should be something they could use in
+    the first week without permission or funding.
+  trap: >-
+    a resource the team does not actually have, presented as if it were theirs, such as a
+    large inheritance, an exclusive patent, or a celebrity co-founder
   reveal: immediate
-- id: money
-  title: Money
-  question: Who pays, and why would they?
-  hint: The user and the customer are not always the same person.
+
+- id: growth
+  title: Growth strategy
+  question: VC-backed, bootstrapped, or something else?
+  hint: The financing path shapes the company more than any single feature.
+  select: single
   options: 4
+  prompt: >-
+    Propose financing and growth paths that fit the previous decisions: venture capital
+    (when the market is large and winner-takes-most), bootstrapping from revenue, grants and
+    public innovation funding, revenue-based financing, or a cooperative or non-profit model.
+    Each option states what it requires (growth rate, margins, proof), what the founders give
+    up (control, time, upside) and when it is the right choice for this specific startup.
   trap: ruinous
   reveal: immediate
-- id: team
-  title: Team
-  question: Which skill is missing in your team, and how do you get it?
+
+- id: attention
+  title: Where to reach them
+  question: Where is the underpriced attention?
+  hint: Pick one channel, online or offline, where your audience is and competitors are not.
+  select: single
   options: 4
-  trap: illegal
+  prompt: >-
+    Propose one communication channel per option, online or offline, where the chosen
+    segment already spends attention and where the cost to reach them is currently low
+    (underpriced attention, Gary Vaynerchuk): niche communities, specific events, partner
+    newsletters, campus channels, professional associations, local media, a particular
+    platform format. Each option names the channel, the concrete tactic for the first
+    month, and why competitors are not there yet.
+  trap: unethical
   reveal: immediate

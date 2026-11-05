@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db, schema } from './db/index.js';
 import { getContent } from './content.js';
+import { summarizeDecision } from './decisions.js';
 
 const cell = (v: unknown) => {
 	const s = v === null || v === undefined ? '' : String(v);
@@ -17,7 +18,7 @@ export function decisionsCsv(gameId: number): string {
 		.select({
 			teamId: schema.decisions.teamId,
 			stationId: schema.decisions.stationId,
-			optionIndex: schema.decisions.optionIndex,
+			choicesJson: schema.decisions.choicesJson,
 			ownText: schema.decisions.ownText,
 			wasTrap: schema.decisions.wasTrap,
 			createdAt: schema.decisions.createdAt,
@@ -32,7 +33,7 @@ export function decisionsCsv(gameId: number): string {
 
 	const header = [
 		'game', 'members', 'topic', 'joined_at', 'completed_at',
-		'station', 'question', 'decided_at', 'kind', 'choice_title', 'choice_text', 'was_trap', 'trap_title', 'model'
+		'station', 'question', 'decided_at', 'kind', 'choices', 'choice_texts', 'own_idea', 'was_trap', 'trap_title', 'model'
 	];
 	const lines = [header.join(',')];
 
@@ -41,23 +42,25 @@ export function decisionsCsv(gameId: number): string {
 		const base = [gameId, t.members, topic, iso(t.createdAt), iso(t.completedAt)];
 		const mine = rows.filter((r) => r.teamId === t.id);
 		if (!mine.length) {
-			lines.push([...base, '', '', '', '', '', '', '', '', ''].map(cell).join(','));
+			lines.push([...base, '', '', '', '', '', '', '', '', '', ''].map(cell).join(','));
 			continue;
 		}
 		for (const r of mine) {
 			const station = content.stations.find((s) => s.id === r.stationId);
 			const options = r.optionsJson ? (JSON.parse(r.optionsJson) as { title: string; text: string }[]) : [];
-			const chosen = r.optionIndex !== null ? options[r.optionIndex] : undefined;
+			const s = summarizeDecision(r.optionsJson, r.choicesJson, r.ownText);
 			const trap = r.trapIndex !== null && r.trapIndex !== undefined ? options[r.trapIndex] : undefined;
+			const kind = r.wasTrap ? 'trap' : s.picked.length === 0 ? 'own' : 'option';
 			lines.push(
 				[
 					...base,
 					station?.title ?? r.stationId,
 					station?.question ?? '',
 					iso(r.createdAt),
-					r.optionIndex === null ? 'own' : r.wasTrap ? 'trap' : 'option',
-					chosen?.title ?? r.ownText ?? '',
-					chosen?.text ?? '',
+					kind,
+					s.picked.map((o) => o.title).join(' | '),
+					s.picked.map((o) => o.text).join(' | '),
+					s.own ?? '',
 					r.wasTrap ? 'yes' : 'no',
 					trap?.title ?? '',
 					r.model ?? ''
