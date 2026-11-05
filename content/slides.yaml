@@ -25,9 +25,9 @@
     - Some decisions are obviously wrong (traps!)
     - Do you trust the options given by AI?
 - type: join
-  title: Found your startup
+  title: Step 1 - Found your startup
   wifi:
-    ssid: CIC Guest
+    ssid: CIC
 - type: board
   title: Where is everybody?
 - type: conclusion
