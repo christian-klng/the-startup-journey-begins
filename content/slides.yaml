@@ -3,19 +3,27 @@
   title: The Startup Journey Begins
   subtitle: An experiment with AI as your co-founder
 - type: markdown
-  title: What you will do today
+  title: Can AI help you to start a business or NGO?
   body: |
-    1. Found a startup or NGO on your phone
-    2. Walk through the room and scan the stations
-    3. At every station an AI suggests options — one of them is a trap
-    4. Decide, and see where the journey takes you
+    - We already use AI every day
+    - It 'knows' a lot
+    - It makes mistakes (what is a mistake, though?)
+    - It can do stuff (e.g. do research)
+    - Do you trust its advice?
 - type: markdown
-  title: What is a business model?
+  title: Let's start an experiment
   body: |
-    - Who has the problem?
-    - What do you offer?
-    - How do people hear about it?
-    - Who pays?
+    1. Form a group, join via QR code
+    2. Pick a topic for your fictional startup
+    3. Go from station to station and make decisions (25 min.)
+    4. Finally, present your idea on stage (2 min. each)
+- type: markdown
+  title: Developing your startup idea
+  body: |
+    - Everybody can do it
+    - Deciding under uncertainty is tough
+    - Some decisions are obviously wrong (traps!)
+    - Do you trust the options given by AI?
 - type: join
   title: Found your startup
   wifi:
