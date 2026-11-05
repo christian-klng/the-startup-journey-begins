@@ -142,7 +142,9 @@ async function callScaleway(messages: { role: string; content: string }[], signa
 				messages,
 				temperature: 0.8,
 				max_tokens: maxTokens,
-				response_format: { type: 'json_object' }
+				response_format: { type: 'json_object' },
+				// Reasoning models (Qwen 3 etc.) otherwise spend the token budget on hidden thinking.
+				chat_template_kwargs: { enable_thinking: false }
 			})
 		});
 	} catch (e) {
@@ -150,16 +152,36 @@ async function callScaleway(messages: { role: string; content: string }[], signa
 		throw new Error(`Could not reach ${url}: ${reason}`);
 	}
 	if (!res.ok) throw new Error(`Scaleway ${res.status} for model "${SCALEWAY_MODEL}": ${(await res.text()).slice(0, 300)}`);
-	const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-	const content = body.choices?.[0]?.message?.content;
-	if (!content) throw new Error('Scaleway returned no content');
+	const body = (await res.json()) as {
+		choices?: { message?: { content?: string | null }; finish_reason?: string }[];
+	};
+	const choice = body.choices?.[0];
+	const content = choice?.message?.content;
+	if (!content) throw new Error(`Scaleway returned no content (finish_reason: ${choice?.finish_reason ?? 'unknown'})`);
+	if (choice?.finish_reason === 'length') {
+		throw new Error(`Model output was cut off at the token limit (${maxTokens}); got: ${content.slice(0, 160)}`);
+	}
 	return content;
 }
 
 function parseResponse(content: string) {
-	// Some models wrap JSON in code fences despite json_object mode.
-	const trimmed = content.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
-	return Response.parse(JSON.parse(trimmed));
+	// Reasoning models may leak <think> blocks; some wrap JSON in code fences despite json_object mode.
+	let text = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+	text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+	const start = text.indexOf('{');
+	const end = text.lastIndexOf('}');
+	if (start === -1 || end === -1) throw new Error(`Model answer contained no JSON object: ${text.slice(0, 160)}`);
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text.slice(start, end + 1));
+	} catch (e) {
+		throw new Error(`Model answer was not valid JSON (${e instanceof Error ? e.message : e}): ${text.slice(0, 160)}`);
+	}
+	const result = Response.safeParse(parsed);
+	if (!result.success) {
+		throw new Error(`Model answer had the wrong shape: ${result.error.issues.map((i) => i.message).join('; ')}`);
+	}
+	return result.data;
 }
 
 /** Generates the options for one station. Retries once on malformed output. */
@@ -169,9 +191,9 @@ export async function generateOptions(ctx: GenerationContext): Promise<Generated
 	let lastError: unknown;
 	for (let attempt = 0; attempt < 2; attempt++) {
 		const controller = new AbortController();
-		const timer = setTimeout(() => controller.abort(), 25_000);
+		const timer = setTimeout(() => controller.abort(), 45_000);
 		try {
-			const content = await callScaleway(messages, controller.signal);
+			const content = await callScaleway(messages, controller.signal, 3000);
 			return finalize(SCALEWAY_MODEL, parseResponse(content).options);
 		} catch (e) {
 			lastError = e;
