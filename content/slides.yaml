@@ -1,0 +1,27 @@
+# Presenter deck. Slide types: title, markdown, join, board, conclusion.
+- type: title
+  title: The Startup Journey Begins
+  subtitle: An experiment with AI as your co-founder
+- type: markdown
+  title: What you will do today
+  body: |
+    1. Found a startup or NGO on your phone
+    2. Walk through the room and scan the stations
+    3. At every station an AI suggests options — one of them is a trap
+    4. Decide, and see where the journey takes you
+- type: markdown
+  title: What is a business model?
+  body: |
+    - Who has the problem?
+    - What do you offer?
+    - How do people hear about it?
+    - Who pays?
+- type: join
+  title: Found your startup
+  wifi:
+    ssid: Classroom-WiFi
+    password: change-me
+- type: board
+  title: Where is everybody?
+- type: conclusion
+  title: What did we learn?

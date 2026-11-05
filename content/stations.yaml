@@ -1,0 +1,39 @@
+# The QR stations in the classroom. Order here = order on the printed sheet.
+# id: slug, must stay stable once QR codes are printed.
+# options: number of serious options the LLM generates (one trap is always added).
+# trap: flavour of the trap option (absurd | illegal | unethical | ruinous).
+# reveal: when students learn that they picked the trap (immediate | end | never).
+- id: problem
+  title: The problem
+  question: Who exactly has this problem, and when does it hurt most?
+  hint: Be concrete. "Everyone" is not a target group.
+  options: 4
+  trap: absurd
+  reveal: immediate
+- id: solution
+  title: The solution
+  question: What is the smallest thing you could build that already helps?
+  hint: Think of a first version you could test next week.
+  options: 4
+  trap: absurd
+  reveal: immediate
+- id: attention
+  title: Promoting your idea
+  question: Where is the underpriced attention?
+  hint: Where does your target group spend time and nobody competes for it yet?
+  options: 4
+  trap: unethical
+  reveal: immediate
+- id: money
+  title: Money
+  question: Who pays, and why would they?
+  hint: The user and the customer are not always the same person.
+  options: 4
+  trap: ruinous
+  reveal: immediate
+- id: team
+  title: Team
+  question: Which skill is missing in your team, and how do you get it?
+  options: 4
+  trap: illegal
+  reveal: immediate

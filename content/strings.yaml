@@ -1,0 +1,19 @@
+# UI texts. Keys are referenced from the app; change the values freely.
+app_title: The Startup Journey Begins
+join_heading: Found your startup
+join_team_name: Name of your startup or NGO
+join_members: Your names
+join_topic: Pick a problem to work on
+join_submit: Let's go
+me_progress: "{done} of {total} stations done"
+me_next: Find the next QR code in the room.
+me_complete: Your journey is complete!
+station_choose: Choose one option or write your own idea.
+station_own_idea: Our own idea
+station_submit: Decide
+station_trap_reveal: That one was the trap. Did you notice why?
+error_llm: The AI is taking a break. Please try again.
+join_error_full: The class is full. Please ask your teacher.
+join_error_fields: Please fill in all fields.
+me_your_startup: Your startup
+me_decisions: Your decisions so far

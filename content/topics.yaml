@@ -1,0 +1,16 @@
+# Problem spaces a team can choose when founding their startup / NGO.
+- id: loneliness
+  title: Loneliness
+  description: People of all ages feel disconnected from others.
+- id: education
+  title: Bad education
+  description: Schools and courses fail to prepare people for real life.
+- id: jobs
+  title: Finding a job
+  description: Matching people with meaningful work is still hard.
+- id: climate
+  title: Climate and waste
+  description: Too much is thrown away, too little is reused.
+- id: health
+  title: Mental and physical health
+  description: Prevention gets less attention than treatment.
