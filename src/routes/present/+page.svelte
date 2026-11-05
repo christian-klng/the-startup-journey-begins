@@ -41,14 +41,17 @@
 	{#key index}
 		<section class="slide {slide.type}">
 			{#if slide.type === 'title'}
+				<p class="eyebrow">{data.strings.app_title}</p>
 				<h1 class="big">{slide.title}</h1>
 				{#if slide.subtitle}<p class="subtitle">{slide.subtitle}</p>{/if}
 			{:else if slide.type === 'markdown'}
+				<p class="eyebrow">{data.strings.app_title}</p>
 				{#if slide.title}<h1>{slide.title}</h1>{/if}
 				<div class="prose">{@html slide.html}</div>
 			{:else if slide.type === 'join'}
+				<p class="eyebrow">{data.strings.app_title}</p>
 				<h1>{slide.title ?? data.strings.join_heading}</h1>
-				<div class="join">
+				<div class="join-grid">
 					<div class="qr">{@html data.join.qr}</div>
 					<div class="join-info">
 						{#if slide.wifi}
@@ -61,9 +64,11 @@
 					</div>
 				</div>
 			{:else if slide.type === 'board'}
+				<p class="eyebrow">{data.strings.app_title}</p>
 				<h1>{slide.title ?? ''}</h1>
 				<Board initial={data.board} />
 			{:else if slide.type === 'conclusion'}
+				<p class="eyebrow">{data.strings.app_title}</p>
 				<h1>{slide.title ?? ''}</h1>
 				<Conclusion board={data.board} />
 			{/if}
@@ -79,19 +84,33 @@
 
 <style>
 	.present {
-		--bg: #15130f;
-		--surface: #23201a;
-		--text: #f5f3ee;
-		--muted: #a9a398;
-		--border: #3a362e;
-		--accent: #ff6b2c;
-		--accent-soft: #3a2316;
+		--bg: #16181d;
+		--surface: #23262b;
+		--text: #ffffff;
+		--muted: #c4c5c7;
+		--border: #3a3d41;
+		--accent: #d50c2f;
+		--accent-soft: #3a1a20;
 		position: fixed;
 		inset: 0;
 		background: var(--bg);
 		color: var(--text);
 		font-size: clamp(16px, 1.6vw, 28px);
 		overflow: hidden;
+	}
+	/* brand rule along the top edge */
+	.present::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 0.45vh;
+		background: var(--accent);
+	}
+	.present :global(.eyebrow) {
+		font-size: 0.7em;
+		margin-bottom: 0.6em;
 	}
 	.slide {
 		position: absolute;
@@ -113,22 +132,30 @@
 		justify-content: flex-start;
 	}
 	h1 {
+		font-family: var(--font-head);
+		font-weight: 900;
 		font-size: 2.6em;
 		margin: 0 0 0.5em;
-		line-height: 1.1;
+		line-height: 1;
+		letter-spacing: -0.02em;
+	}
+	.slide.title {
+		align-items: flex-start;
 	}
 	.big {
-		font-size: 4.2em;
-		text-align: center;
+		font-size: 4.6em;
+		max-width: 13ch;
 	}
 	.subtitle {
-		text-align: center;
-		font-size: 1.6em;
+		font-size: 1.4em;
+		font-weight: 300;
 		color: var(--muted);
+		max-width: 28em;
 		margin: 0;
 	}
 	.prose {
-		font-size: 1.5em;
+		font-size: 1.45em;
+		font-weight: 300;
 		line-height: 1.5;
 		max-width: 40em;
 	}
@@ -145,7 +172,7 @@
 	.prose :global(strong) {
 		color: var(--accent);
 	}
-	.join {
+	.join-grid {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		gap: 5vw;
@@ -155,7 +182,7 @@
 		width: min(50vh, 40vw);
 		background: #fff;
 		padding: 1.5vh;
-		border-radius: 1vh;
+		border-radius: 8px;
 	}
 	.qr :global(svg) {
 		display: block;
@@ -164,15 +191,18 @@
 	}
 	.join-info .label {
 		margin: 0;
-		color: var(--muted);
+		color: var(--accent);
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		font-size: 0.8em;
+		letter-spacing: 0.08em;
+		font-weight: 600;
+		font-size: 0.7em;
 	}
 	.join-info .value {
 		margin: 0.1em 0 0.9em;
+		font-family: var(--font-head);
 		font-size: 2.2em;
-		font-weight: 700;
+		font-weight: 800;
+		letter-spacing: -0.02em;
 	}
 	.join-info .url {
 		font-size: 1.4em;
@@ -203,6 +233,9 @@
 		color: var(--text);
 		font-size: 1.3em;
 		line-height: 1;
+	}
+	.controls button:hover {
+		background: var(--accent);
 	}
 	.controls button:disabled {
 		opacity: 0.3;

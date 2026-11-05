@@ -46,13 +46,6 @@
 	header {
 		margin-bottom: 1.5rem;
 	}
-	.eyebrow {
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		font-size: 0.75rem;
-		color: var(--muted);
-		margin: 0;
-	}
 	h1 {
 		margin: 0.2rem 0;
 	}
@@ -62,6 +55,7 @@
 		gap: 0.5rem;
 		padding: 1.5rem 1rem;
 		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		margin-bottom: 1.5rem;
 		text-align: center;
@@ -82,8 +76,9 @@
 		background: var(--surface);
 		display: grid;
 		place-items: center;
+		font-family: var(--font-head);
 		font-size: 2.2rem;
-		font-weight: 700;
+		font-weight: 800;
 	}
 	.ring small {
 		font-size: 1rem;
@@ -106,6 +101,7 @@
 		gap: 0.15rem;
 		padding: 0.75rem 1rem;
 		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 	}
 	.station {

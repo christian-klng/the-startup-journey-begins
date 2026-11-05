@@ -55,7 +55,7 @@
 	}
 	.status.live::before {
 		content: '●';
-		color: #3fb950;
+		color: #2fbf71;
 		margin-right: 0.3rem;
 	}
 	.empty {
@@ -73,12 +73,13 @@
 	}
 	li {
 		background: var(--surface);
-		border-radius: 10px;
+		border-radius: 8px;
 		padding: 0.7rem 0.9rem;
-		border: 2px solid transparent;
+		border: 1px solid var(--border);
 	}
 	li.completed {
-		border-color: #3fb950;
+		border-color: #2fbf71;
+		box-shadow: inset 0 0 0 1px #2fbf71;
 	}
 	.head {
 		display: grid;

@@ -33,14 +33,18 @@
 	}
 	.stats div {
 		background: var(--surface);
-		border-radius: var(--radius);
+		border: 1px solid var(--border);
+		border-radius: 8px;
 		padding: 1rem;
 		display: grid;
 		text-align: center;
 	}
 	.stats strong {
+		font-family: var(--font-head);
+		font-weight: 900;
 		font-size: 3rem;
 		line-height: 1;
+		color: var(--accent);
 	}
 	.stats span {
 		color: var(--muted);
@@ -61,7 +65,8 @@
 		align-items: baseline;
 		padding: 0.4rem 0.8rem;
 		background: var(--surface);
-		border-radius: 10px;
+		border: 1px solid var(--border);
+		border-radius: 8px;
 	}
 	.topic {
 		grid-column: 1 / -1;
@@ -82,6 +87,6 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.traps.none {
-		color: #3fb950;
+		color: #2fbf71;
 	}
 </style>

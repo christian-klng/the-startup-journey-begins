@@ -120,13 +120,6 @@
 </main>
 
 <style>
-	.eyebrow {
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		font-size: 0.75rem;
-		color: var(--muted);
-		margin: 0;
-	}
 	h1 {
 		margin: 0.2rem 0 0.5rem;
 	}
@@ -144,6 +137,7 @@
 	}
 	.card {
 		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 1rem;
 		margin: 1rem 0;
@@ -182,13 +176,18 @@
 		column-gap: 0.75rem;
 		align-items: start;
 		padding: 0.9rem 1rem;
-		border: 2px solid var(--border);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		background: var(--surface);
+		transition: border-color 0.18s;
 	}
 	.option.selected {
 		border-color: var(--accent);
+		box-shadow: inset 0 0 0 1px var(--accent);
 		background: var(--accent-soft);
+	}
+	.option input {
+		accent-color: var(--accent);
 	}
 	.option.dimmed {
 		opacity: 0.45;
@@ -218,22 +217,13 @@
 		font-weight: 600;
 	}
 	.trap {
-		border: 2px solid var(--accent);
+		border: 1px solid var(--accent);
+		box-shadow: inset 0 0 0 1px var(--accent);
 		background: var(--accent-soft);
 		font-weight: 600;
 	}
 	.next {
 		text-align: center;
 		margin-top: 1rem;
-	}
-	.button {
-		display: block;
-		text-align: center;
-		text-decoration: none;
-		font-weight: 600;
-		padding: 0.9rem 1.2rem;
-		border-radius: var(--radius);
-		background: var(--accent);
-		color: #fff;
 	}
 </style>

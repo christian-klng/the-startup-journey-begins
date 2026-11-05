@@ -10,6 +10,7 @@
 <svelte:head><title>Admin · The Startup Journey Begins</title></svelte:head>
 
 <main class="admin">
+	<p class="eyebrow">The Startup Journey Begins</p>
 	<h1>Admin</h1>
 
 	<section class="cards">
@@ -155,6 +156,7 @@
 	}
 	.card {
 		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 1rem;
 	}
@@ -184,22 +186,22 @@
 	}
 	.button {
 		display: inline-block;
-		text-decoration: none;
-		font-weight: 600;
+		width: auto;
 		padding: 0.7rem 1.1rem;
-		border-radius: var(--radius);
-		background: var(--accent);
-		color: #fff;
 	}
 	.button.secondary {
 		background: var(--surface);
 		color: var(--text);
-		border: 2px solid var(--border);
+		border: 1px solid var(--silver);
+	}
+	.button.secondary:hover {
+		background: var(--soft);
 	}
 	table {
 		width: 100%;
 		border-collapse: collapse;
 		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		overflow: hidden;
 	}

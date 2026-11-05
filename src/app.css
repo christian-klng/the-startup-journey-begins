@@ -1,13 +1,34 @@
+/* Design language inspired by startup-incubator.berlin: red on white, ink-dark text,
+   Archivo for headings (heavy, tight), Inter for body, small red uppercase kickers,
+   flat 4–8px radii, dark anthracite presenter. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-	--bg: #f5f3ee;
+	--red: #d50c2f;
+	--red-d: #bd0a29;
+	--ink: #13151a;
+	--ink2: #3a3c3f;
+	--grey: #6b6f73;
+	--silver: #c4c5c7;
+	--hair: #e6e6e9;
+	--soft: #f6f7f9;
+	--soft-red: #fbe7eb;
+	--green: #1f8a4c;
+
+	/* semantic tokens used by all components */
+	--bg: var(--soft);
 	--surface: #ffffff;
-	--text: #1d1b17;
-	--muted: #6b665c;
-	--border: #e3dfd6;
-	--accent: #d9480f;
-	--accent-soft: #fdece4;
-	--danger: #b42318;
-	--radius: 14px;
+	--text: var(--ink);
+	--muted: var(--grey);
+	--border: var(--hair);
+	--accent: var(--red);
+	--accent-hover: var(--red-d);
+	--accent-soft: var(--soft-red);
+	--danger: var(--red);
+	--radius: 8px;
+	--radius-sm: 6px;
+	--font-head: 'Archivo', 'Inter', system-ui, sans-serif;
+	--font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 	color-scheme: light;
 }
 
@@ -16,13 +37,10 @@
 }
 
 html {
-	font-family:
-		system-ui,
-		-apple-system,
-		'Segoe UI',
-		Roboto,
-		sans-serif;
-	line-height: 1.45;
+	font-family: var(--font-body);
+	font-weight: 400;
+	line-height: 1.55;
+	letter-spacing: -0.1px;
 	background: var(--bg);
 	color: var(--text);
 	-webkit-text-size-adjust: 100%;
@@ -38,14 +56,44 @@ main.phone {
 	padding: 1.5rem 1rem 3rem;
 }
 
+h1,
+h2,
+h3 {
+	font-family: var(--font-head);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.05;
+	margin: 0 0 0.5em;
+}
+
 h1 {
-	font-size: 1.6rem;
-	line-height: 1.2;
+	font-size: 1.9rem;
 }
 
 h2 {
-	font-size: 1.1rem;
+	font-size: 1.2rem;
 	margin: 0 0 0.75rem;
+}
+
+/* Red uppercase kicker with a short rule, as on the site. */
+.eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-family: var(--font-body);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--accent);
+	margin: 0 0 0.4rem;
+}
+
+.eyebrow::before {
+	content: '';
+	width: 1.4rem;
+	height: 2px;
+	background: var(--accent);
 }
 
 .muted {
@@ -63,33 +111,49 @@ input:not([type]),
 textarea {
 	width: 100%;
 	font: inherit;
-	padding: 0.75rem 0.9rem;
-	border: 2px solid var(--border);
-	border-radius: var(--radius);
+	padding: 0.8rem 0.9rem;
+	border: 1px solid var(--silver);
+	border-radius: var(--radius-sm);
 	background: var(--surface);
 	color: var(--text);
 }
 
 input:focus-visible,
 textarea:focus-visible,
-button:focus-visible {
-	outline: 3px solid var(--accent);
+button:focus-visible,
+a:focus-visible {
+	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
-button {
-	font: inherit;
+button,
+.button {
+	font-family: var(--font-body);
+	font-size: 0.95rem;
 	font-weight: 600;
-	padding: 0.9rem 1.2rem;
+	padding: 0.9rem 1.4rem;
 	border: 0;
-	border-radius: var(--radius);
+	border-radius: var(--radius-sm);
 	background: var(--accent);
 	color: #fff;
 	cursor: pointer;
 	width: 100%;
+	text-decoration: none;
+	text-align: center;
+	display: block;
+	transition: background 0.18s;
+}
+
+button:hover,
+.button:hover {
+	background: var(--accent-hover);
 }
 
 button:disabled {
-	opacity: 0.6;
-	cursor: wait;
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+a {
+	color: var(--accent);
 }

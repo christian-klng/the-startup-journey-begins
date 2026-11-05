@@ -14,6 +14,7 @@
 <svelte:head><title>{s.join_heading} · {s.app_title}</title></svelte:head>
 
 <main class="phone">
+	<p class="eyebrow">{s.app_title}</p>
 	<h1>{s.join_heading}</h1>
 
 	{#if form?.error === 'full'}
@@ -80,13 +81,18 @@
 		column-gap: 0.75rem;
 		align-items: start;
 		padding: 0.75rem 1rem;
-		border: 2px solid var(--border);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		background: var(--surface);
+		transition: border-color 0.18s;
 	}
 	.topic.selected {
 		border-color: var(--accent);
+		box-shadow: inset 0 0 0 1px var(--accent);
 		background: var(--accent-soft);
+	}
+	.topic input {
+		accent-color: var(--accent);
 	}
 	.topic input {
 		grid-row: span 2;
