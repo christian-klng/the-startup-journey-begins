@@ -54,6 +54,7 @@
 			</section>
 		{/if}
 		<a class="button" href="/me">{s.station_back}</a>
+		<p class="next muted">{data.progress.done >= data.progress.total ? s.me_complete : s.station_next_hint}</p>
 	{:else}
 		{#if form?.error}<p class="error">{s.station_error}</p>{/if}
 		{#await data.options}
@@ -220,6 +221,10 @@
 		border: 2px solid var(--accent);
 		background: var(--accent-soft);
 		font-weight: 600;
+	}
+	.next {
+		text-align: center;
+		margin-top: 1rem;
 	}
 	.button {
 		display: block;

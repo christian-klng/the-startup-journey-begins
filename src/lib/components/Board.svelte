@@ -7,6 +7,9 @@
 	let board = $state<Board>(initial);
 	let live = $state(false);
 
+	/** 1 column up to 4 teams, 2 up to 8, 3 up to 15, then 4. */
+	const cols = $derived(board.teams.length <= 4 ? 1 : board.teams.length <= 8 ? 2 : board.teams.length <= 15 ? 3 : 4);
+
 	onMount(() => {
 		const source = new EventSource('/api/events');
 		source.addEventListener('board', (e) => {
@@ -23,14 +26,14 @@
 	{#if board.teams.length === 0}
 		<p class="empty">No startups yet. Scan the QR code to found one.</p>
 	{:else}
-		<ul class="teams" style="--cols: {board.teams.length > 12 ? 3 : board.teams.length > 6 ? 2 : 1}">
+		<ul class="teams" style="--cols: {cols}" class:dense={board.teams.length > 15}>
 			{#each board.teams as t (t.id)}
 				<li class:completed={t.completed}>
 					<div class="head">
 						<span class="name">{t.members}</span>
+						<span class="topic">{t.topic}</span>
 						<span class="count">{t.done}/{board.total}</span>
 					</div>
-					<div class="meta">{t.topic}</div>
 					<div class="bar"><span style="width: {board.total ? (t.done / board.total) * 100 : 0}%"></span></div>
 				</li>
 			{/each}
@@ -66,45 +69,53 @@
 		padding: 0;
 		display: grid;
 		grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-		gap: 0.8rem 1.2rem;
+		gap: 0.6rem 1rem;
 	}
 	li {
 		background: var(--surface);
-		border-radius: var(--radius);
-		padding: 0.8rem 1rem;
+		border-radius: 10px;
+		padding: 0.7rem 0.9rem;
 		border: 2px solid transparent;
 	}
 	li.completed {
 		border-color: #3fb950;
 	}
 	.head {
-		display: flex;
-		justify-content: space-between;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto auto;
 		align-items: baseline;
-		gap: 1rem;
+		gap: 0.6rem;
 	}
 	.name {
 		font-weight: 700;
-		font-size: 1.25rem;
+		font-size: 1.2rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.topic {
+		color: var(--muted);
+		font-size: 0.9rem;
 		white-space: nowrap;
 	}
 	.count {
 		font-variant-numeric: tabular-nums;
 		font-weight: 600;
 		color: var(--muted);
-	}
-	.meta {
-		color: var(--muted);
 		font-size: 0.95rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	}
+	.dense li {
+		padding: 0.35rem 0.7rem;
+	}
+	.dense .name {
+		font-size: 0.95rem;
+	}
+	.dense .topic {
+		font-size: 0.75rem;
 	}
 	.bar {
-		margin-top: 0.5rem;
-		height: 0.5rem;
+		margin-top: 0.35rem;
+		height: 0.4rem;
 		background: var(--border);
 		border-radius: 999px;
 		overflow: hidden;

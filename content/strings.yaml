@@ -27,3 +27,4 @@ station_error: That did not work. Pick at least one option, not more than allowe
 # Language the LLM writes its options in, and who the players are (used in the prompt).
 llm_language: English
 llm_audience: Master students at a business school who already know economics and management basics
+station_next_hint: Now find the next QR code in the room and scan it with your camera app.
