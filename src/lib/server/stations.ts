@@ -79,7 +79,7 @@ export function getOrCreateGeneration(team: Team, station: Station): Promise<Gen
 	const topic = getContent().topics.find((t) => t.id === team.topicId) ?? { id: team.topicId, title: team.topicId };
 	const previous = getTeamProgress(team).decisions.map(({ title, question, choice }) => ({ title, question, choice }));
 
-	const promise = generateOptions({ teamName: team.name, topic, station, previous })
+	const promise = generateOptions({ members: team.members, topic, station, previous })
 		.then((result) =>
 			db
 				.insert(schema.generations)

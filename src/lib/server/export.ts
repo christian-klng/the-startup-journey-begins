@@ -31,14 +31,14 @@ export function decisionsCsv(gameId: number): string {
 		.all();
 
 	const header = [
-		'game', 'team', 'members', 'topic', 'joined_at', 'completed_at',
+		'game', 'members', 'topic', 'joined_at', 'completed_at',
 		'station', 'question', 'decided_at', 'kind', 'choice_title', 'choice_text', 'was_trap', 'trap_title', 'model'
 	];
 	const lines = [header.join(',')];
 
 	for (const t of teams) {
 		const topic = content.topics.find((x) => x.id === t.topicId)?.title ?? t.topicId;
-		const base = [gameId, t.name, t.members, topic, iso(t.createdAt), iso(t.completedAt)];
+		const base = [gameId, t.members, topic, iso(t.createdAt), iso(t.completedAt)];
 		const mine = rows.filter((r) => r.teamId === t.id);
 		if (!mine.length) {
 			lines.push([...base, '', '', '', '', '', '', '', '', ''].map(cell).join(','));

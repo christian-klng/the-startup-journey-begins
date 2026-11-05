@@ -17,7 +17,7 @@
 <ul class="teams">
 	{#each board.teams as t (t.id)}
 		<li>
-			<span class="name">{t.name}</span>
+			<span class="name">{t.members}</span>
 			<span class="topic">{t.topic}</span>
 			<span class="traps" class:none={t.traps === 0}>{t.traps} {t.traps === 1 ? 'trap' : 'traps'}</span>
 		</li>

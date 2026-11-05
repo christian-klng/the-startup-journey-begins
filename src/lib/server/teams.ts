@@ -17,7 +17,7 @@ export class TeamError extends Error {
 	}
 }
 
-export function createTeam(input: { name: string; members: string; topicId: string }): Team {
+export function createTeam(input: { members: string; topicId: string }): Team {
 	const game = getCurrentGame();
 	if (!getContent().topics.some((t) => t.id === input.topicId)) {
 		throw new TeamError('invalid_topic', 'Unknown topic');
@@ -34,7 +34,6 @@ export function createTeam(input: { name: string; members: string; topicId: stri
 		.values({
 			id: randomBytes(12).toString('base64url'),
 			gameId: game.id,
-			name: input.name,
 			members: input.members,
 			topicId: input.topicId
 		})

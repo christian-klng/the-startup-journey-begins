@@ -16,7 +16,6 @@ export const teams = sqliteTable('teams', {
 	gameId: integer('game_id')
 		.notNull()
 		.references(() => games.id),
-	name: text('name').notNull(),
 	members: text('members').notNull(),
 	topicId: text('topic_id').notNull(),
 	createdAt: integer('created_at').notNull().default(now),

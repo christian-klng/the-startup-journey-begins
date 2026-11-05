@@ -17,7 +17,7 @@ export interface GeneratedOptions {
 }
 
 export interface GenerationContext {
-	teamName: string;
+	members: string;
 	topic: { title: string; description?: string };
 	station: Station;
 	previous: { title: string; question: string; choice: string }[];
@@ -75,7 +75,7 @@ At each station you propose options. Rules:
 		? ctx.previous.map((p, i) => `${i + 1}. ${p.title} — ${p.question}\n   Decision: ${p.choice}`).join('\n')
 		: '(none yet — this is their first station)';
 
-	const user = `Team: "${ctx.teamName}"
+	const user = `Team members: ${ctx.members}
 Problem space: ${ctx.topic.title}${ctx.topic.description ? ` — ${ctx.topic.description}` : ''}
 
 Previous decisions:
@@ -115,7 +115,7 @@ function mockOptions(ctx: GenerationContext): GeneratedOptions {
 	const n = ctx.station.options;
 	const raw = Array.from({ length: n }, (_, i) => ({
 		title: `Sensible option ${i + 1} for "${ctx.station.title}"`,
-		text: `A realistic answer to "${ctx.station.question}" for ${ctx.teamName} working on ${ctx.topic.title}. (mock, no API key configured)`,
+		text: `A realistic answer to "${ctx.station.question}" for the team of ${ctx.members} working on ${ctx.topic.title}. (mock, no API key configured)`,
 		trap: false
 	}));
 	raw.push({

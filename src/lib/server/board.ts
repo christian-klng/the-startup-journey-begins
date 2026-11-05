@@ -5,7 +5,6 @@ import { getCurrentGame } from './game.js';
 
 export interface BoardTeam {
 	id: string;
-	name: string;
 	members: string;
 	topic: string;
 	done: number;
@@ -53,7 +52,6 @@ export function getBoard(): Board {
 		const mine = decisions.filter((d) => d.teamId === t.id);
 		return {
 			id: t.id,
-			name: t.name,
 			members: t.members,
 			topic: content.topics.find((x) => x.id === t.topicId)?.title ?? t.topicId,
 			done: mine.length,

@@ -27,10 +27,10 @@
 			{#each board.teams as t (t.id)}
 				<li class:completed={t.completed}>
 					<div class="head">
-						<span class="name">{t.name}</span>
+						<span class="name">{t.members}</span>
 						<span class="count">{t.done}/{board.total}</span>
 					</div>
-					<div class="meta">{t.members} · {t.topic}</div>
+					<div class="meta">{t.topic}</div>
 					<div class="bar"><span style="width: {board.total ? (t.done / board.total) * 100 : 0}%"></span></div>
 				</li>
 			{/each}

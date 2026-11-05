@@ -23,12 +23,10 @@ export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const form = await request.formData();
 		const next = safeNext(String(form.get('next') ?? ''));
-		const name = clean(form.get('name'), 60);
 		const members = clean(form.get('members'), 120);
 		const topicId = clean(form.get('topic'), 40);
-		const values = { name, members, topicId };
+		const values = { members, topicId };
 
-		if (name.length < 2) return fail(400, { error: 'name', values });
 		if (members.length < 2) return fail(400, { error: 'members', values });
 		if (!topicId) return fail(400, { error: 'topic', values });
 

@@ -10,13 +10,13 @@
 	);
 </script>
 
-<svelte:head><title>{data.team.name} · {s.app_title}</title></svelte:head>
+<svelte:head><title>{data.team.members} · {s.app_title}</title></svelte:head>
 
 <main class="phone">
 	<header>
 		<p class="eyebrow">{s.me_your_startup}</p>
-		<h1>{data.team.name}</h1>
-		<p class="muted">{data.team.members} · {data.team.topic}</p>
+		<h1>{data.team.members}</h1>
+		<p class="muted">{data.team.topic}</p>
 	</header>
 
 	<section class="progress" aria-live="polite">

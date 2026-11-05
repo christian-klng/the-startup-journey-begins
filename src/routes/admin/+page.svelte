@@ -64,12 +64,11 @@
 		{:else}
 			<table>
 				<thead>
-					<tr><th>Team</th><th>Members</th><th>Topic</th><th>Progress</th><th>Traps</th><th>Last station</th></tr>
+					<tr><th>Team</th><th>Topic</th><th>Progress</th><th>Traps</th><th>Last station</th></tr>
 				</thead>
 				<tbody>
 					{#each data.board.teams as t (t.id)}
 						<tr class:completed={t.completed}>
-							<td>{t.name}</td>
 							<td>{t.members}</td>
 							<td>{t.topic}</td>
 							<td>{t.done} / {data.board.total}</td>
